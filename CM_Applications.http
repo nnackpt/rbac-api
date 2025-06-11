@@ -1,0 +1,58 @@
+@RBACapi_HostAddress = http://localhost:5070/api
+
+// Get All Applications
+GET {{RBACapi_HostAddress}}/Applications/
+Accept: application/json
+
+###
+
+// Get Applications by id
+GET {{RBACapi_HostAddress}}/Applications/APP_ATH_TEST
+Accept: application/json
+
+###
+
+// Create Applications
+POST {{RBACapi_HostAddress}}/Applications
+Content-Type: application/json
+
+{
+  "APP_Code": "APP_ATH_TEST",
+  "name": "TEST",
+  "title": "TEST API",
+  "desc": "TEST From RBAC API",
+  "active": true,
+  "basE_URL": "",
+  "logiN_URL": "",
+  "createD_BY": "phakin.thongla-ar",
+  "createD_DATETIME": "2025-06-11T10:30:00",
+  "updateD_BY": "phakin.thongla-ar"
+}
+
+###
+
+// Update Applications
+PUT {{RBACapi_HostAddress}}/Applications/APP_ATH_TEST
+Content-Type: application/json
+
+{
+  "APP_Code": "APP_ATH_TEST",
+  "name": "TEST",
+  "title": "TEST API",
+  "desc": "TEST From RBAC API",
+  "active": true,
+  "basE_URL": null,
+  "logiN_URL": null,
+  "createD_BY": "phakin.thongla-ar",
+  "createD_DATETIME": "2025-06-11T10:30:00",
+  "updateD_BY": "phakin.thongla-ar",
+  "updateD_DATETIME": null
+}
+
+###
+
+// Delete Applications by Code
+DELETE {{RBACapi_HostAddress}}/Applications/APP_ATH_TEST
+Accept: application/json
+
+###
