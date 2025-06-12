@@ -1,0 +1,49 @@
+@RBACapi_HostAddress = http://localhost:5070/api
+
+// Get all APP Roles
+GET {{RBACapi_HostAddress}}/CmAppRoles
+Accept: application/json
+
+###
+
+// Get App Roles by Code
+GET {{RBACapi_HostAddress}}/CmAppRoles/ADMIN_TEST
+Accept: application/json
+
+###
+
+// Create new App Roles
+POST {{RBACapi_HostAddress}}/CmAppRoles
+Accept: application/json
+Content-Type: application/json
+
+{
+  "role_CODE": "ADMIN_TEST",
+  "app_CODE": "APP_ATH_TEST",
+  "name": "Administrator",
+  "desc": "Full access to system",
+  "home_URL": "/admin/home",
+  "active": true,
+  "created_BY": "phakin.thongla-ar",
+  "created_DATETIME": "2025-06-12T09:00:00",
+  "updated_BY": null,
+  "updated_DATETIME": null
+}
+
+###
+
+// Update App Roles
+PUT {{RBACapi_HostAddress}}/CmAppRoles/ADMIN_TEST
+Accept: application/json
+Content-Type: application/json
+
+{
+  "role_CODE": "ADMIN_TEST",
+  "app_CODE": "APP_ATH_TEST",
+  "name": "System Admin",
+  "desc": "Manage everything",
+  "home_URL": "/admin/dashboard",
+  "active": true,
+  "updated_BY": "phakin.thongla-ar",
+  "updated_DATETIME": "2025-06-12T10:00:00"
+}

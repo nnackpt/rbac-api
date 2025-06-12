@@ -17,6 +17,7 @@ namespace RBACapi.Services
         public async Task<List<CM_APPS_FUNCTIONS>> GetAllAsync()
         {
             return await _context.AppFunctions.ToListAsync();
+            //return await _context.AppFunctions.Include(r => r.CM_APPLICATIONS).ToListAsync();
         }
 
         // Get by id
