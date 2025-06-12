@@ -6,11 +6,11 @@ namespace RBACapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ApplicationsController : ControllerBase
+    public class CmApplicationsController : ControllerBase
     {
         private readonly IApplicationsService _service;
 
-        public ApplicationsController(IApplicationsService service)
+        public CmApplicationsController(IApplicationsService service)
         {
             _service = service;
         }

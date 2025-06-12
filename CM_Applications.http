@@ -1,19 +1,19 @@
 @RBACapi_HostAddress = http://localhost:5070/api
 
 // Get All Applications
-GET {{RBACapi_HostAddress}}/Applications/
+GET {{RBACapi_HostAddress}}/CmApplications/
 Accept: application/json
 
 ###
 
 // Get Applications by id
-GET {{RBACapi_HostAddress}}/Applications/APP_ATH_TEST
+GET {{RBACapi_HostAddress}}/CmApplications/APP_ATH_TEST
 Accept: application/json
 
 ###
 
 // Create Applications
-POST {{RBACapi_HostAddress}}/Applications
+POST {{RBACapi_HostAddress}}/CmApplications
 Content-Type: application/json
 
 {
@@ -32,7 +32,7 @@ Content-Type: application/json
 ###
 
 // Update Applications
-PUT {{RBACapi_HostAddress}}/Applications/APP_ATH_TEST
+PUT {{RBACapi_HostAddress}}/CmApplications/APP_ATH_TEST
 Content-Type: application/json
 
 {
@@ -52,7 +52,7 @@ Content-Type: application/json
 ###
 
 // Delete Applications by Code
-DELETE {{RBACapi_HostAddress}}/Applications/APP_ATH_TEST
+DELETE {{RBACapi_HostAddress}}/CmApplications/APP_ATH_TEST
 Accept: application/json
 
 ###
