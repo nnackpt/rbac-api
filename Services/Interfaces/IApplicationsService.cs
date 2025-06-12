@@ -1,6 +1,6 @@
 using RBACapi.Models;
 
-namespace RBACapi.Services
+namespace RBACapi.Services.Interfaces
 {
     public interface IApplicationsService
     {

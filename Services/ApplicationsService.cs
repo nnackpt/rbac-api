@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RBACapi.Data;
 using RBACapi.Models;
+using RBACapi.Services.Interfaces;
 
 namespace RBACapi.Services
 {

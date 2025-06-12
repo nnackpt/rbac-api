@@ -2,6 +2,7 @@ using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using RBACapi.Data;
 using RBACapi.Services;
+using RBACapi.Services.Interfaces;
 
 Env.Load();
 
