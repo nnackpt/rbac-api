@@ -1,0 +1,51 @@
+@RBACapi_HostAddress = http://localhost:5070/api
+
+// Get all App Function
+GET {{RBACapi_HostAddress}}/CmAppFunctions
+Accept: application/json
+
+###
+
+// Get App Function by funcCode
+GET {{RBACapi_HostAddress}}/CmAppFunctions/TEST_API
+Accept: application/json
+
+###
+
+// Create App Function
+POST {{RBACapi_HostAddress}}/CmAppFunctions
+Accept: application/json
+Content-Type: application/json
+
+{
+    "FUNC_CODE": "TEST_API",
+    "APP_CODE": "APP_ATH_TEST",
+    "NAME": "API Tester",
+    "DESC": "TESTING/API",
+    "FUNC_URL": null,
+    "ACTIVE": true,
+    "CREATED_BY": "phakin.thongla-ar",
+    "CREATED_DATETIME": null,
+    "UPDATED_BY": null,
+    "UPDATED_DATETIME": null
+}
+
+###
+
+// Update by id
+PUT {{RBACapi_HostAddress}}/CmAppFunctions/TEST_API
+Accept: application/json
+Content-Type: application/json
+
+{
+  "FUNC_CODE": "TEST_API",
+  "APP_CODE": "APP_ATH_TEST",
+  "NAME": "API TEST",
+  "FUNC_URL": "/test",
+  "ACTIVE": true,                   
+  "CREATED_DATETIME": "2025-06-11T07:00:00", 
+  "UPDATED_BY": "phakin.thongla-ar",
+  "UPDATED_DATETIME": "2025-06-11T09:00:00"
+}
+
+##
