@@ -9,6 +9,7 @@ namespace RBACapi.Data
         public DbSet<CM_APPLICATIONS> Applications { get; set; }
         public DbSet<CM_APPS_FUNCTIONS> AppFunctions { get; set; }
         public DbSet<CM_APPS_ROLES> AppRoles { get; set; }
+        public DbSet<CM_RBAC> RBAC { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -21,6 +22,7 @@ namespace RBACapi.Data
             modelBuilder.ApplyConfiguration(new EntityConfigurations.CM_APPLICATIONS_Configuration());
             modelBuilder.ApplyConfiguration(new EntityConfigurations.CM_APPS_FUNCTIONS_Configuration());
             modelBuilder.ApplyConfiguration(new EntityConfigurations.CM_APPS_ROLES_Configuration());
+            modelBuilder.ApplyConfiguration(new EntityConfigurations.CM_RBAC_Configuration());
             base.OnModelCreating(modelBuilder);
         }
     }
