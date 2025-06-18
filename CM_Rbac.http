@@ -1,0 +1,47 @@
+@RBACapi_HostAddress = http://localhost:5070/api
+
+// Get all RBAC
+GET {{RBACapi_HostAddress}}/Rbac
+Accept: application/json
+
+###
+
+// Get RBAC by code
+GET {{RBACapi_HostAddress}}/Rbac/ATH_TEST_RBAC02
+Accept: application/json
+
+###
+
+// Create RBAC
+POST {{RBACapi_HostAddress}}/Rbac
+Accept: application/json
+Content-Type: application/json
+
+{
+    "APP_CODE": "APP_ATH_TEST",
+    "ROLE_CODE": "ADMIN_TEST",
+    "FUNC_CODES": ["Tester", "Admin"],
+    "CREATED_BY": "phakin.thongla-ar"
+}
+
+###
+
+// Update RBAC
+PUT {{RBACapi_HostAddress}}/Rbac/APP_ATH_TEST/ADMIN_TEST
+Accept: application/json
+Content-Type: application/json
+
+{
+    "APP_CODE": "APP_ATH_TEST",
+    "ROLE_CODE": "ADMIN_TEST",
+    "FUNC_CODES": ["Func01", "Func02"],
+    "UPDATED_BY": "phakin.thongla-ar"
+}
+
+###
+
+// Delete RBAC
+DELETE {{RBACapi_HostAddress}}/Rbac/ATH_TEST_RBAC02
+Accept: application/json
+
+###

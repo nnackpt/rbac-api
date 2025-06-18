@@ -18,7 +18,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING")));
@@ -26,6 +25,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
 builder.Services.AddScoped<RBACapi.Services.AppFunctionsService>();
 builder.Services.AddScoped<IAppRolesService, AppRolesService>();
+builder.Services.AddScoped<IRbacService, RbacService>();
+builder.Services.AddScoped<ILookupService, LookupService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
