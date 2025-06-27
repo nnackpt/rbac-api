@@ -27,7 +27,7 @@ Content-Type: application/json
 ###
 
 // Update RBAC
-PUT {{RBACapi_HostAddress}}/Rbac/APP_ATH_TEST/ADMIN_TEST
+PUT {{RBACapi_HostAddress}}/Rbac/ATH_TEST_RBAC02
 Accept: application/json
 Content-Type: application/json
 

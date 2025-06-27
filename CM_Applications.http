@@ -38,15 +38,15 @@ Content-Type: application/json
 {
   "APP_Code": "APP_ATH_TEST",
   "name": "TEST",
-  "title": "TEST API",
+  "title": "TEST API V2",
   "desc": "TEST From RBAC API",
-  "active": true,
-  "basE_URL": null,
-  "logiN_URL": null,
+  "active": false,
+  "basE_URL": "",
+  "logiN_URL": "",
   "createD_BY": "phakin.thongla-ar",
   "createD_DATETIME": "2025-06-11T10:30:00",
   "updateD_BY": "phakin.thongla-ar",
-  "updateD_DATETIME": null
+  "updateD_DATETIME": "2025-06-24T10:00:00"
 }
 
 ###
