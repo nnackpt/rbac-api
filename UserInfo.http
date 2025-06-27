@@ -1,0 +1,7 @@
+@RBACapi_HostAddress = http://localhost:5070/api
+@auth = ntlm
+
+GET {{RBACapi_HostAddress}}/UserInfo/current
+Accept: application/json
+
+###

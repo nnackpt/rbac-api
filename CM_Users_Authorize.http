@@ -1,0 +1,80 @@
+@RBACapi_HostAddress = http://localhost:5070/api
+@auth = ntlm
+
+// Login
+// POST {{RBACapi_HostAddress}}/auth/login
+// Accept: application/json
+// Authorization: {{auth}}
+
+###
+
+//Get All
+GET {{RBACapi_HostAddress}}/CmUserAuthorize
+Accept: application/json
+
+###
+
+// Get by AUTH Code
+GET {{RBACapi_HostAddress}}/CmUserAuthorize/ATH_TEST_USER_001
+Accept: application/json
+
+###
+
+// Create User
+POST {{RBACapi_HostAddress}}/CmUserAuthorize
+Content-Type: application/json
+Accept: application/json
+
+{
+  "APP_CODE": "APP_ATH_TEST",
+  "ROLE_CODE": "ADMIN_TEST",
+  "USERID": "TEST",
+  "Facilities": [
+    {
+      "SITE_CODE": "ATH_AB",
+      "DOMAIN_CODE": "ATHAB",
+      "FACT_CODE": "ATA"
+    },
+    {
+      "SITE_CODE": "ATH_TE",
+      "DOMAIN_CODE": "ATHTE",
+      "FACT_CODE": "ATA"
+    }
+  ],
+  "FNAME": "TE",
+  "LNAME": "ST",
+  "ORG": "IT",
+  "ACTIVE": true
+}
+
+###
+
+// Update User
+PUT {{RBACapi_HostAddress}}/CmUserAuthorize/ATH_TEST_USER_002
+Content-Type: application/json
+Accept: application/json
+
+{
+  "APP_CODE": "APP_ATH_TEST",
+  "ROLE_CODE": "ADMIN_TEST",
+  "USERID": "TEST",
+  "Facilities": [
+    {
+      "SITE_CODE": "ATH_TE",
+      "DOMAIN_CODE": "ATHTE",
+      "FACT_CODE": "ATA"
+    }
+  ],
+  "FNAME": "TE",
+  "LNAME": "ST",
+  "ORG": "ITTTTTTTTTT",
+  "ACTIVE": true
+}
+
+###
+
+// Delete User
+DELETE {{RBACapi_HostAddress}}/CmUserAuthorize/ATH_TEST_USER_005
+Accept: application/json
+
+###

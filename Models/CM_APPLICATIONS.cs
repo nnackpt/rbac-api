@@ -16,8 +16,8 @@ namespace RBACapi.Models
         public string? BASE_URL { get; set; }
         public string? LOGIN_URL { get; set; }
         public string? CREATED_BY { get; set; }
-        public DateTime? CREATED_DATETIME { get; set; }
+        public DateTimeOffset? CREATED_DATETIME { get; set; }
         public string? UPDATED_BY { get; set; }
-        public DateTime? UPDATED_DATETIME { get; set; }
+        public DateTimeOffset? UPDATED_DATETIME { get; set; }
     }
 }

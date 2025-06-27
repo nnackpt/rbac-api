@@ -13,10 +13,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://10.83.51.52:3000")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
+        policy.WithOrigins(
+            "http://localhost:3000", 
+            "http://10.83.51.52:3000",
+            "https://localhost:3000", 
+            "https://10.83.51.52:3000"
+        )
+        .AllowCredentials()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
@@ -28,12 +33,18 @@ builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
 builder.Services.AddScoped<IAppFunctionsService, AppFunctionsService>();
 builder.Services.AddScoped<IAppRolesService, AppRolesService>();
 builder.Services.AddScoped<IRbacService, RbacService>();
+builder.Services.AddScoped<IUsersAuthorizeService, UsersAuthorizeService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
 
 builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
     .AddNegotiate();
 
-builder.Services.AddControllers();
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter());
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 //builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -48,12 +59,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
