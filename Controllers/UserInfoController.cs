@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RBACapi.Controllers
 {
-    [Authorize]
+    //[Authorize]
+    [AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
     public class UserInfoController : ControllerBase
@@ -12,12 +13,18 @@ namespace RBACapi.Controllers
         public IActionResult GetCurrentUserInfo()
         {
             // Retrieve user information from the claims
-            var userName = User.Identity?.Name;
-
-            if (string.IsNullOrEmpty(userName))
+            var fullName = User.Identity?.Name;
+            string? userName = null;
+            if (!string.IsNullOrEmpty(fullName))
             {
-                return Unauthorized();
+                var parts = fullName.Split('\\');
+                userName = parts.Length > 1 ? parts[1] : parts[0];
             }
+
+            // if (string.IsNullOrEmpty(userName))
+            // {
+            //     return Unauthorized();
+            // }
 
             // Return user information
             return Ok(new
