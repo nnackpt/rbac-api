@@ -62,16 +62,25 @@ namespace RBACapi.Services
         // Update RBAC
         public async Task<CM_RBAC?> UpdateAsync(string rbacCode, RbacUpdateRequest req)
         {
-            var existing = await _context.RBAC
-                .Where(r => r.RBAC_CODE == rbacCode)
+            var existingFuncsForRole = await _context.RBAC
+                .Where(r => r.ROLE_CODE == req.ROLE_CODE && r.APP_CODE == req.APP_CODE)
                 .ToListAsync();
 
-            _context.RBAC.RemoveRange(existing);
+            var existingFuncCodes = existingFuncsForRole.Select(r => r.FUNC_CODE).ToHashSet();
+            var requestedFuncCodes = req.FUNC_CODES.ToHashSet();
+
+            var funcsToRemove = existingFuncsForRole.Where(r => !requestedFuncCodes.Contains(r.FUNC_CODE)).ToList();
+            if (funcsToRemove.Any())
+            {
+                _context.RBAC.RemoveRange(funcsToRemove);
+            }
+
+            var funcCodesToAdd = requestedFuncCodes.Where(c => !existingFuncCodes.Contains(c)).ToList();
 
             var now = DateTime.UtcNow;
             var appCodeSuffix = req.APP_CODE.Replace("APP_", "");
-            
-            var newItems = req.FUNC_CODES.Select((code, index) => new CM_RBAC
+
+            var newItems = funcCodesToAdd.Select((code, index) => new CM_RBAC
             {
                 RBAC_CODE = $"{appCodeSuffix}_RBAC{index + 1:00}",
                 ROLE_CODE = req.ROLE_CODE,
@@ -82,12 +91,12 @@ namespace RBACapi.Services
                 CREATED_DATETIME = now,
                 UPDATED_BY = req.UPDATED_BY,
                 UPDATED_DATETIME = now
-            });
+            }).ToList();
 
             await _context.RBAC.AddRangeAsync(newItems);
             await _context.SaveChangesAsync();
-            
-            return newItems.FirstOrDefault();
+
+            return await GetByCodeAsync(rbacCode);
         }
 
         // Delete RBAC

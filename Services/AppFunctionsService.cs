@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using RBACapi.Data;
 using RBACapi.Models;
+using RBACapi.Services.Interfaces;
 
 namespace RBACapi.Services
 {
-    public class AppFunctionsService
+    public class AppFunctionsService : IAppFunctionsService
     {
         private readonly ApplicationDbContext _context;
 
@@ -45,7 +46,7 @@ namespace RBACapi.Services
             func.FUNC_URL = updated.FUNC_URL;
             func.ACTIVE = updated.ACTIVE;
             func.UPDATED_BY = updated.UPDATED_BY;
-            func.UPDATED_DATETIME = DateTime.UtcNow;
+            func.UPDATED_DATETIME = updated.UPDATED_DATETIME;
 
             await _context.SaveChangesAsync();
             return func;
