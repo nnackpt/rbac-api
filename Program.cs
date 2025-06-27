@@ -1,4 +1,5 @@
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
 using RBACapi.Data;
 using RBACapi.Services;
@@ -14,7 +15,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:3000", "http://10.83.51.52:3000")
                 .AllowAnyMethod()
-                .AllowAnyHeader();
+                .AllowAnyHeader()
+                .AllowCredentials();
     });
 });
 
@@ -23,10 +25,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING")));
 
 builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
-builder.Services.AddScoped<RBACapi.Services.AppFunctionsService>();
+builder.Services.AddScoped<IAppFunctionsService, AppFunctionsService>();
 builder.Services.AddScoped<IAppRolesService, AppRolesService>();
 builder.Services.AddScoped<IRbacService, RbacService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
+
+builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+    .AddNegotiate();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -46,6 +51,8 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
