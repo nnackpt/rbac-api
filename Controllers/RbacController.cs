@@ -34,6 +34,16 @@ namespace RBACapi.Controllers
         [HttpPost]
         public async Task<ActionResult<CM_RBAC>> Create(RbacRequest req)
         {
+            var createdBy = User.Identity?.Name;
+            if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
+            {
+                createdBy = createdBy.Split('\\')[1];
+            }
+            if (string.IsNullOrEmpty(createdBy))
+            {
+                createdBy = "anonymous";
+            }
+            req.CREATED_BY = createdBy;
             var created = await _service.CreateAsync(req);
             return Ok(created);
         }
@@ -41,6 +51,12 @@ namespace RBACapi.Controllers
         [HttpPut("{rbacCode}")]
         public async Task<IActionResult> Update(string rbacCode, RbacUpdateRequest req)
         {
+            var updatedBy = User.Identity?.Name;
+            if (string.IsNullOrEmpty(updatedBy))
+            {
+                updatedBy = "anonymous";
+            }
+            req.UPDATED_BY = updatedBy;
             var updated = await _service.UpdateAsync(rbacCode, req);
             if (updated == null) return NotFound();
             return Ok(updated);

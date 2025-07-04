@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace RBACapi.Controllers
 {
     //[Authorize]
-    [AllowAnonymous]
+    // [AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
     public class UserInfoController : ControllerBase

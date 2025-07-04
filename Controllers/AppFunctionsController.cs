@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RBACapi.Models;
-using RBACapi.Services;
+using RBACapi.Services.Interfaces;
 
 namespace RBACapi.Controllers
 {
@@ -8,9 +8,9 @@ namespace RBACapi.Controllers
     [Route("api/[controller]")]
     public class CmAppFunctionsController : ControllerBase
     {
-        private readonly AppFunctionsService _service;
+        private readonly IAppFunctionsService _service;
 
-        public CmAppFunctionsController(AppFunctionsService service)
+        public CmAppFunctionsController(IAppFunctionsService service)
         {
             _service = service;
         }
@@ -36,6 +36,19 @@ namespace RBACapi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CM_APPS_FUNCTIONS func)
         {
+            var createdBy = User.Identity?.Name;
+            if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
+            {
+                createdBy = createdBy.Split('\\')[1];
+            }
+            if (string.IsNullOrEmpty(createdBy))
+            {
+                createdBy = "anonymous";
+            }
+            func.CREATED_BY = createdBy;
+            func.CREATED_DATETIME = DateTimeOffset.UtcNow;
+            func.UPDATED_BY = null;
+            func.UPDATED_DATETIME = null;
             var result = await _service.CreateAsync(func);
             return CreatedAtAction(nameof(GetById), new { funcCode = result.FUNC_CODE }, result);
         }
@@ -44,6 +57,17 @@ namespace RBACapi.Controllers
         [HttpPut("{funcCode}")]
         public async Task<IActionResult> Update(string funcCode, [FromBody] CM_APPS_FUNCTIONS updated)
         {
+            var updatedBy = User.Identity?.Name;
+            if (!string.IsNullOrEmpty(updatedBy) && updatedBy.Contains("\\"))
+            {
+                updatedBy = updatedBy.Split('\\')[1];
+            }
+            if (string.IsNullOrEmpty(updatedBy))
+            {
+                updatedBy = "anonymous";
+            }
+            updated.UPDATED_BY = updatedBy;
+            updated.UPDATED_DATETIME = DateTimeOffset.UtcNow;
             var result = await _service.UpdateAsync(funcCode, updated);
             if (result == null) return NotFound();
             return Ok(result);

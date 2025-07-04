@@ -48,12 +48,11 @@ namespace RBACapi.Controllers
             {
                 return BadRequest(ModelState);
             }
-            // var createdBy = User.Identity?.Name;
-            var createdBy = "anonymous"; // ปิด authen ชั่วคราว
-            // if (string.IsNullOrEmpty(createdBy))
-            // {
-            //     return Unauthorized("User identity could not be determined for creation.");
-            // }
+            var createdBy = User.Identity?.Name;
+            if (string.IsNullOrEmpty(createdBy))
+            {
+                createdBy = "anonymous";
+            }
 
             var createdAuthorizations = await _usersAuthorizeService.CreateAsync(request, createdBy);
 
@@ -96,7 +95,12 @@ namespace RBACapi.Controllers
                 userAuthorize.ACTIVE = request.ACTIVE;
             // ไม่รองรับการแก้ไข Facilities ในการ update เดี่ยวนี้ (ถ้าต้องการแจ้งเพิ่ม)
 
-            userAuthorize.UPDATED_BY = "anonymous"; // หรือดึงจาก User.Identity
+            var updatedBy = User.Identity?.Name;
+            if (string.IsNullOrEmpty(updatedBy))
+            {
+                updatedBy = "anonymous";
+            }
+            userAuthorize.UPDATED_BY = updatedBy;
             userAuthorize.UPDATED_DATETIME = DateTime.UtcNow;
 
             await _usersAuthorizeService.UpdateAsync(userAuthorize);
