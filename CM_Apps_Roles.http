@@ -1,4 +1,4 @@
-@RBACapi_HostAddress = http://localhost:5070/api
+@RBACapi_HostAddress = https://localhost:7070/api
 
 // Get all APP Roles
 GET {{RBACapi_HostAddress}}/CmAppRoles

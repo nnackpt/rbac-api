@@ -1,5 +1,5 @@
-@RBACapi_HostAddress = http://localhost:5070/api
-
+@RBACapi_HostAddress = https://localhost:7070/api
+# @auth-type = "negotiate"
 // Get all RBAC
 GET {{RBACapi_HostAddress}}/Rbac
 Accept: application/json
@@ -20,7 +20,7 @@ Content-Type: application/json
 {
     "APP_CODE": "APP_ATH_TEST",
     "ROLE_CODE": "ADMIN_TEST",
-    "FUNC_CODES": ["Tester", "Admin"],
+    "FUNC_CODES": ["Build"],
     "CREATED_BY": "phakin.thongla-ar"
 }
 
