@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RBACapi.Models;
 using RBACapi.Services.Interfaces;
 
 namespace RBACapi.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class RbacController : ControllerBase
@@ -29,6 +31,14 @@ namespace RBACapi.Controllers
             var rbac = await _service.GetByCodeAsync(rbacCode);
             if (rbac == null) return NotFound();
             return Ok(rbac);
+        }
+
+        // Get Assigned Functions 
+        [HttpGet("assigned-functions/{appCode}/{roleCode}")]
+        public async Task<ActionResult<IEnumerable<string>>> GetAssignedFunctions(string appCode, string roleCode)
+        {
+            var assignedFunctions = await _service.GetAssignedFunctionsAsync(appCode, roleCode);
+            return Ok(assignedFunctions);
         }
 
         [HttpPost]

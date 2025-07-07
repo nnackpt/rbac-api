@@ -35,17 +35,55 @@ namespace RBACapi.Services
                 .FirstOrDefaultAsync(r => r.RBAC_CODE == rbacCode);
         }
 
+        // Get Assigned Functions
+        public async Task<IEnumerable<string>> GetAssignedFunctionsAsync(string appCode, string roleCode)
+
+        {
+            var assignedFunctions = await _context.RBAC
+                .Where(r => r.APP_CODE == appCode && r.ROLE_CODE == roleCode && r.ACTIVE == true)
+                .Select(r => r.FUNC_CODE)
+                .Distinct()
+                .ToListAsync();
+
+            return assignedFunctions;
+        }
         // Create new RBAC
         public async Task<CM_RBAC> CreateAsync(RbacRequest req)
         {
             var now = DateTime.UtcNow;
             var appCodeSuffix = req.APP_CODE.Replace("APP_", "");
 
-            var items = req.FUNC_CODES.Select((code, index) => new CM_RBAC
+            // Delete ole Role and App
+            var existingRbacs = await _context.RBAC
+                .Where(r => r.ROLE_CODE == req.ROLE_CODE && r.APP_CODE == req.APP_CODE)
+                .ToListAsync();
+
+            if (existingRbacs.Any())
             {
-                RBAC_CODE = $"{appCodeSuffix}_RBAC{index + 1:00}",
+                _context.RBAC.RemoveRange(existingRbacs);
+            }
+
+            // Create new RBAC
+            var existingCodes = await _context.RBAC
+                .Where(r => r.RBAC_CODE.StartsWith($"{appCodeSuffix}_RBAC"))
+                .Select(r => r.RBAC_CODE)
+                .ToListAsync();
+
+            int maxIndex = 0;
+            foreach (var code in existingCodes)
+            {
+                var suffix = code.Replace($"{appCodeSuffix}_RBAC", "");
+                if (int.TryParse(suffix, out int index))
+                {
+                    maxIndex = Math.Max(maxIndex, index);
+                }
+            }
+
+            var items = req.FUNC_CODES.Select((funcCode, i) => new CM_RBAC
+            {
+                RBAC_CODE = $"{appCodeSuffix}_RBAC{maxIndex + i + 1:00}",
                 ROLE_CODE = req.ROLE_CODE,
-                FUNC_CODE = code,
+                FUNC_CODE = funcCode,
                 APP_CODE = req.APP_CODE,
                 ACTIVE = true,
                 CREATED_BY = req.CREATED_BY,
