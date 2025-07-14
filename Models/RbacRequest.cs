@@ -14,11 +14,14 @@ namespace RBACapi.Models
         public List<string> FUNC_CODES { get; set; } = new();
 
         public string? CREATED_BY { get; set; }
+        public DateTimeOffset? CREATED_DATETIME { get; set; }
+        public string? UPDATED_BY { get; set; }
+        public DateTimeOffset? UPDATED_DATETIME { get; set; }
     }
 
     public class RbacUpdateRequest : RbacRequest
     {
-        [Required]
-        public string UPDATED_BY { get; set; } = string.Empty;
+        // [Required]
+        // public string UPDATED_BY { get; set; } = string.Empty;
     }
 }
