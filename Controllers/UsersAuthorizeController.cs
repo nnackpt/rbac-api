@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RBACapi.Models;
 using RBACapi.Models.Dtos;
 using RBACapi.Services.Interfaces;
+using RBACapi.Utils;
 
 namespace RBACapi.Controllers
 {
@@ -51,7 +52,8 @@ namespace RBACapi.Controllers
             var createdBy = User.Identity?.Name;
             if (string.IsNullOrEmpty(createdBy))
             {
-                createdBy = "anonymous";
+                // createdBy = "anonymous";
+                createdBy = UserHelper.GetCurrentUsername(User.Identity);
             }
 
             var createdAuthorizations = await _usersAuthorizeService.CreateAsync(request, createdBy);
@@ -95,11 +97,12 @@ namespace RBACapi.Controllers
                 userAuthorize.ACTIVE = request.ACTIVE;
             // ไม่รองรับการแก้ไข Facilities ในการ update เดี่ยวนี้ (ถ้าต้องการแจ้งเพิ่ม)
 
-            var updatedBy = User.Identity?.Name;
-            if (string.IsNullOrEmpty(updatedBy))
-            {
-                updatedBy = "anonymous";
-            }
+            // var updatedBy = User.Identity?.Name;
+            // if (string.IsNullOrEmpty(updatedBy))
+            // {
+            //     updatedBy = "anonymous";
+            // }
+            var updatedBy = UserHelper.GetCurrentUsername(User.Identity);
             userAuthorize.UPDATED_BY = updatedBy;
             userAuthorize.UPDATED_DATETIME = DateTime.UtcNow;
 

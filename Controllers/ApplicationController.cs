@@ -36,16 +36,17 @@ namespace RBACapi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CM_APPLICATIONS application)
         {
-            var createdBy = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
-            {
-                createdBy = createdBy.Split('\\')[1];
-            }
-            if (string.IsNullOrEmpty(createdBy))
-            {
-                createdBy = "anonymous";
-            }
-            application.CREATED_BY = createdBy;
+            // var createdBy = User.Identity?.Name;
+            // if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
+            // {
+            //     createdBy = createdBy.Split('\\')[1];
+            // }
+            // if (string.IsNullOrEmpty(createdBy))
+            // {
+            //     createdBy = "anonymous";
+            // }
+            // application.CREATED_BY = createdBy;
+            application.CREATED_BY = UserHelper.GetCurrentUsername(User.Identity);
             application.CREATED_DATETIME = DateTimeOffset.UtcNow;
             application.UPDATED_BY = null;
             application.UPDATED_DATETIME = null;
@@ -58,16 +59,17 @@ namespace RBACapi.Controllers
         public async Task<IActionResult> Update(string code, CM_APPLICATIONS application)
         {
             if (code != application.APP_CODE) return BadRequest();
-            var updatedBy = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(updatedBy) && updatedBy.Contains("\\"))
-            {
-                updatedBy = updatedBy.Split('\\')[1];
-            }
-            if (string.IsNullOrEmpty(updatedBy))
-            {
-                updatedBy = "anonymous";
-            }
-            application.UPDATED_BY = updatedBy;
+            // var updatedBy = User.Identity?.Name;
+            // if (!string.IsNullOrEmpty(updatedBy) && updatedBy.Contains("\\"))
+            // {
+            //     updatedBy = updatedBy.Split('\\')[1];
+            // }
+            // if (string.IsNullOrEmpty(updatedBy))
+            // {
+            //     updatedBy = "anonymous";
+            // }
+            // application.UPDATED_BY = updatedBy;
+            application.UPDATED_BY = UserHelper.GetCurrentUsername(User.Identity);
             application.UPDATED_DATETIME = DateTimeOffset.UtcNow;
             var updated = await _service.UpdateApplicationAsync(application);
             return updated ? NoContent() : NotFound();

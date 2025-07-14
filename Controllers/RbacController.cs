@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RBACapi.Models;
 using RBACapi.Services.Interfaces;
+using RBACapi.Utils;
 
 namespace RBACapi.Controllers
 {
-    [AllowAnonymous]
+    // [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class RbacController : ControllerBase
@@ -44,16 +45,20 @@ namespace RBACapi.Controllers
         [HttpPost]
         public async Task<ActionResult<CM_RBAC>> Create(RbacRequest req)
         {
-            var createdBy = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
-            {
-                createdBy = createdBy.Split('\\')[1];
-            }
-            if (string.IsNullOrEmpty(createdBy))
-            {
-                createdBy = "anonymous";
-            }
-            req.CREATED_BY = createdBy;
+            // var createdBy = User.Identity?.Name;
+            // if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
+            // {
+            //     createdBy = createdBy.Split('\\')[1];
+            // }
+            // if (string.IsNullOrEmpty(createdBy))
+            // {
+            //     createdBy = "anonymous";
+            // }
+            // req.CREATED_BY = createdBy;
+
+            req.CREATED_BY = UserHelper.GetCurrentUsername(User.Identity);
+            req.UPDATED_BY = null;
+            req.UPDATED_DATETIME = null;
             var created = await _service.CreateAsync(req);
             return Ok(created);
         }
@@ -61,12 +66,14 @@ namespace RBACapi.Controllers
         [HttpPut("{rbacCode}")]
         public async Task<IActionResult> Update(string rbacCode, RbacUpdateRequest req)
         {
-            var updatedBy = User.Identity?.Name;
-            if (string.IsNullOrEmpty(updatedBy))
-            {
-                updatedBy = "anonymous";
-            }
-            req.UPDATED_BY = updatedBy;
+            // var updatedBy = User.Identity?.Name;
+            // if (string.IsNullOrEmpty(updatedBy))
+            // {
+            //     updatedBy = "anonymous";
+            // }
+            // req.UPDATED_BY = updatedBy;
+            req.UPDATED_BY = UserHelper.GetCurrentUsername(User.Identity);
+            req.UPDATED_DATETIME = DateTimeOffset.UtcNow;
             var updated = await _service.UpdateAsync(rbacCode, req);
             if (updated == null) return NotFound();
             return Ok(updated);

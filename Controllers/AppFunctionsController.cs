@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RBACapi.Models;
 using RBACapi.Services.Interfaces;
+using RBACapi.Utils;
 
 namespace RBACapi.Controllers
 {
@@ -32,20 +33,30 @@ namespace RBACapi.Controllers
             return Ok(result);
         }
 
+        // GET: /api/AppsFunctions/{appCode}
+        [HttpGet("app/{appCode}")]
+        public async Task<IActionResult> GetByAppCode(string appCode)
+        {
+            var result = await _service.GetByAppCodeAsync(appCode);
+            if (result == null || !result.Any()) return NotFound();
+            return Ok(result);
+        }
+
         // Create App Functions
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CM_APPS_FUNCTIONS func)
         {
-            var createdBy = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
-            {
-                createdBy = createdBy.Split('\\')[1];
-            }
-            if (string.IsNullOrEmpty(createdBy))
-            {
-                createdBy = "anonymous";
-            }
-            func.CREATED_BY = createdBy;
+            // var createdBy = User.Identity?.Name;
+            // if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
+            // {
+            //     createdBy = createdBy.Split('\\')[1];
+            // }
+            // if (string.IsNullOrEmpty(createdBy))
+            // {
+            //     createdBy = "anonymous";
+            // }
+            // func.CREATED_BY = createdBy;
+            func.CREATED_BY = UserHelper.GetCurrentUsername(User.Identity);
             func.CREATED_DATETIME = DateTimeOffset.UtcNow;
             func.UPDATED_BY = null;
             func.UPDATED_DATETIME = null;
@@ -57,16 +68,17 @@ namespace RBACapi.Controllers
         [HttpPut("{funcCode}")]
         public async Task<IActionResult> Update(string funcCode, [FromBody] CM_APPS_FUNCTIONS updated)
         {
-            var updatedBy = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(updatedBy) && updatedBy.Contains("\\"))
-            {
-                updatedBy = updatedBy.Split('\\')[1];
-            }
-            if (string.IsNullOrEmpty(updatedBy))
-            {
-                updatedBy = "anonymous";
-            }
-            updated.UPDATED_BY = updatedBy;
+            // var updatedBy = User.Identity?.Name;
+            // if (!string.IsNullOrEmpty(updatedBy) && updatedBy.Contains("\\"))
+            // {
+            //     updatedBy = updatedBy.Split('\\')[1];
+            // }
+            // if (string.IsNullOrEmpty(updatedBy))
+            // {
+            //     updatedBy = "anonymous";
+            // }
+            // updated.UPDATED_BY = updatedBy;
+            updated.UPDATED_BY = UserHelper.GetCurrentUsername(User.Identity);
             updated.UPDATED_DATETIME = DateTimeOffset.UtcNow;
             var result = await _service.UpdateAsync(funcCode, updated);
             if (result == null) return NotFound();

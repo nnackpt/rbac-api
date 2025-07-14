@@ -27,6 +27,14 @@ namespace RBACapi.Services
             return await _context.AppFunctions.FindAsync(funcCode);
         }
 
+        // Get by AppCode
+        public async Task<IEnumerable<CM_APPS_FUNCTIONS>> GetByAppCodeAsync(string appCode)
+        {
+            return await _context.AppFunctions
+                .Where(f => f.APP_CODE == appCode)
+                .ToListAsync();
+        }
+
         // Create new
         public async Task<CM_APPS_FUNCTIONS> CreateAsync(CM_APPS_FUNCTIONS func)
         {
