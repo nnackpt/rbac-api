@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RBACapi.Models;
 using RBACapi.Services.Interfaces;
+using RBACapi.Utils;
 
 namespace RBACapi.Controllers
 {
