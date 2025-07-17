@@ -1,8 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+// using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RBACapi.Data;
 using RBACapi.Models;
 using RBACapi.Services.Interfaces;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace RBACapi.Services
 {
@@ -100,41 +103,84 @@ namespace RBACapi.Services
         // Update RBAC
         public async Task<CM_RBAC?> UpdateAsync(string rbacCode, RbacUpdateRequest req)
         {
-            var existingFuncsForRole = await _context.RBAC
-                .Where(r => r.ROLE_CODE == req.ROLE_CODE && r.APP_CODE == req.APP_CODE)
+            var existingRbacs = await _context.RBAC
+                .Where(r => r.APP_CODE == req.APP_CODE && r.ROLE_CODE == req.ROLE_CODE)
                 .ToListAsync();
 
-            var existingFuncCodes = existingFuncsForRole.Select(r => r.FUNC_CODE).ToHashSet();
+            var existingFuncCodes = existingRbacs.Select(r => r.FUNC_CODE).ToHashSet();
             var requestedFuncCodes = req.FUNC_CODES.ToHashSet();
 
-            var funcsToRemove = existingFuncsForRole.Where(r => !requestedFuncCodes.Contains(r.FUNC_CODE)).ToList();
+            var funcsToRemove = existingRbacs
+                .Where(r => !requestedFuncCodes.Contains(r.FUNC_CODE))
+                .ToList();
+
             if (funcsToRemove.Any())
             {
                 _context.RBAC.RemoveRange(funcsToRemove);
             }
 
-            var funcCodesToAdd = requestedFuncCodes.Where(c => !existingFuncCodes.Contains(c)).ToList();
+            var funcCodesToAdd = requestedFuncCodes
+                .Where(c => !existingFuncCodes.Contains(c))
+                .ToList();
 
             var now = DateTime.UtcNow;
             var appCodeSuffix = req.APP_CODE.Replace("APP_", "");
 
-            var newItems = funcCodesToAdd.Select((code, index) => new CM_RBAC
+            // Find next available sequential RBAC_CODE
+            int maxExistingSuffix = 0;
+
+            var rbacCodesForSuffix = await _context.RBAC
+                .Where(r => r.RBAC_CODE.StartsWith($"{appCodeSuffix}_RBAC"))
+                .Select(r => r.RBAC_CODE)
+                .ToListAsync();
+
+            if (rbacCodesForSuffix.Any())
             {
-                RBAC_CODE = $"{appCodeSuffix}_RBAC{index + 1:00}",
-                ROLE_CODE = req.ROLE_CODE,
-                FUNC_CODE = code,
-                APP_CODE = req.APP_CODE,
-                ACTIVE = true,
-                CREATED_BY = req.UPDATED_BY,
-                CREATED_DATETIME = now,
-                UPDATED_BY = req.UPDATED_BY,
-                UPDATED_DATETIME = now
+                var regex = new Regex($@"^{Regex.Escape(appCodeSuffix)}_RBAC(\d+)$");
+
+                maxExistingSuffix = rbacCodesForSuffix
+                    .Select(code =>
+                    {
+                        var match = regex.Match(code);
+                        return match.Success && int.TryParse(match.Groups[1].Value, out int suffix) ? suffix : 0;
+                    })
+                    .DefaultIfEmpty(0)
+                    .Max();
+            }
+
+            int nextSuffix = maxExistingSuffix + 1;
+
+            var newItems = funcCodesToAdd.Select(code =>
+            {
+                var rbacCodeForNewItem = $"{appCodeSuffix}_RBAC{nextSuffix:00}";
+                nextSuffix++;
+
+                return new CM_RBAC
+                {
+                    RBAC_CODE = rbacCodeForNewItem,
+                    ROLE_CODE = req.ROLE_CODE,
+                    FUNC_CODE = code,
+                    APP_CODE = req.APP_CODE,
+                    ACTIVE = true,
+                    CREATED_BY = req.UPDATED_BY,
+                    CREATED_DATETIME = now,
+                    UPDATED_BY = req.UPDATED_BY,
+                    UPDATED_DATETIME = now
+                };
             }).ToList();
 
-            await _context.RBAC.AddRangeAsync(newItems);
+            if (newItems.Any())
+            {
+                await _context.RBAC.AddRangeAsync(newItems);
+            }
+
             await _context.SaveChangesAsync();
 
-            return await GetByCodeAsync(rbacCode);
+            return await _context.RBAC
+                .Include(r => r.CM_APPLICATIONS)
+                .Include(r => r.CM_APPS_ROLES)
+                .Include(r => r.CM_APPS_FUNCTIONS)
+                .FirstOrDefaultAsync(r => r.APP_CODE == req.APP_CODE && r.ROLE_CODE == req.ROLE_CODE);
         }
 
         // Delete RBAC

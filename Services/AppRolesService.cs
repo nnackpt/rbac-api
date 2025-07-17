@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using RBACapi.Data;
 using RBACapi.Models;
 using RBACapi.Services.Interfaces;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace RBACapi.Services
 {
@@ -30,6 +32,40 @@ namespace RBACapi.Services
         // Create new 
         public async Task<CM_APPS_ROLES> CreateRoleAsync(CM_APPS_ROLES role)
         {
+            if (string.IsNullOrEmpty(role.APP_CODE))
+            {
+                throw new ArgumentException("APP_CODE can't be null or empty.");
+            }
+
+            string appCodePrefix = role.APP_CODE;
+            if (appCodePrefix.StartsWith("APP_"))
+            {
+                appCodePrefix = appCodePrefix.Substring(4);
+            }
+
+            int maxExistingSuffix = 0;
+            var existingRoleCodes = await _context.AppRoles
+                .Where(r => r.APP_CODE == role.APP_CODE && r.ROLE_CODE.StartsWith($"{appCodePrefix}_R"))
+                .Select(r => r.ROLE_CODE)
+                .ToListAsync();
+
+            if (existingRoleCodes.Any())
+            {
+                var regex = new Regex($@"^{Regex.Escape(appCodePrefix)}_R(\d+)$");
+
+                maxExistingSuffix = existingRoleCodes
+                    .Select(code =>
+                    {
+                        var match = regex.Match(code);
+                        return match.Success && int.TryParse(match.Groups[1].Value, out int suffix) ? suffix : 0;
+                    })
+                    .DefaultIfEmpty(0)
+                    .Max();
+            }
+
+            int nextSuffix = maxExistingSuffix + 1;
+            role.ROLE_CODE = $"{appCodePrefix}_R{nextSuffix:00}";
+            
             _context.AppRoles.Add(role);
             await _context.SaveChangesAsync();
             return role;
