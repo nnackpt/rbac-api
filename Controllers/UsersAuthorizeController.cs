@@ -27,6 +27,14 @@ namespace RBACapi.Controllers
             return Ok(usersAuthorize);
         }
 
+        // GET: api/CmUserAuthorize/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<CM_USERS_AUTHORIZE>>> GetUserAuthorizeByUserId(string userId)
+        {
+            var userAuthorizations = await _usersAuthorizeService.GetByUserIdAsync(userId);
+            return Ok(userAuthorizations);
+        }
+
         // GET: api/UserAuthorize/{authCode}
         [HttpGet("{authCode}")]
         public async Task<ActionResult<CM_USERS_AUTHORIZE>> GetUserAuthorizeById(string authCode)
@@ -40,6 +48,18 @@ namespace RBACapi.Controllers
             return Ok(userAuthorize);
         }
 
+        // GET: api/CmUserAuthorize/{authCode}/facilities
+        [HttpGet("{authCode}/facilities")] 
+        public async Task<ActionResult<IEnumerable<FacilitySelectionDto>>> GetUserFacilities(string authCode)
+        {
+            var facilities = await _usersAuthorizeService.GetUserFacilitiesByAuthCodeAsync(authCode);
+            if (facilities == null || !facilities.Any())
+            {
+                return NotFound();
+            }
+            return Ok(facilities);
+        }
+
         // POST: api/UserAuthorize
         [HttpPost]
         // [Authorize]
@@ -50,10 +70,14 @@ namespace RBACapi.Controllers
                 return BadRequest(ModelState);
             }
             var createdBy = User.Identity?.Name;
+            if (!string.IsNullOrEmpty(createdBy) && createdBy.Contains("\\"))
+            {
+                createdBy = createdBy.Split('\\')[1];
+            }
             if (string.IsNullOrEmpty(createdBy))
             {
-                // createdBy = "anonymous";
-                createdBy = UserHelper.GetCurrentUsername(User.Identity);
+                createdBy = "anonymous";
+                // createdBy = UserHelper.GetCurrentUsername(User.Identity);
             }
 
             var createdAuthorizations = await _usersAuthorizeService.CreateAsync(request, createdBy);
@@ -76,8 +100,8 @@ namespace RBACapi.Controllers
         [HttpPut("{authCode}")]
         public async Task<IActionResult> UpdateUserAuthorize(string authCode, UsersAuthorizeUpdateRequestDto request)
         {
-            var userAuthorize = await _usersAuthorizeService.GetByIdAsync(authCode);
-            if (userAuthorize == null)
+            var existingUserAuthorize = await _usersAuthorizeService.GetByAuthCodeForFacilitiesAsync(authCode);
+            if (!existingUserAuthorize.Any())
             {
                 return NotFound();
             }
@@ -85,16 +109,16 @@ namespace RBACapi.Controllers
             // APP_CODE และ USERID แก้ไขไม่ได้
             // userAuthorize.APP_CODE = userAuthorize.APP_CODE;
             // userAuthorize.USERID = userAuthorize.USERID;
-            if (!string.IsNullOrEmpty(request.ROLE_CODE))
-                userAuthorize.ROLE_CODE = request.ROLE_CODE;
-            if (!string.IsNullOrEmpty(request.FNAME))
-                userAuthorize.FNAME = request.FNAME;
-            if (!string.IsNullOrEmpty(request.LNAME))
-                userAuthorize.LNAME = request.LNAME;
-            if (!string.IsNullOrEmpty(request.ORG))
-                userAuthorize.ORG = request.ORG;
-            if (request.ACTIVE.HasValue)
-                userAuthorize.ACTIVE = request.ACTIVE;
+            // if (!string.IsNullOrEmpty(request.ROLE_CODE))
+            //     userAuthorize.ROLE_CODE = request.ROLE_CODE;
+            // if (!string.IsNullOrEmpty(request.FNAME))
+            //     userAuthorize.FNAME = request.FNAME;
+            // if (!string.IsNullOrEmpty(request.LNAME))
+            //     userAuthorize.LNAME = request.LNAME;
+            // if (!string.IsNullOrEmpty(request.ORG))
+            //     userAuthorize.ORG = request.ORG;
+            // if (request.ACTIVE.HasValue)
+            //     userAuthorize.ACTIVE = request.ACTIVE;
             // ไม่รองรับการแก้ไข Facilities ในการ update เดี่ยวนี้ (ถ้าต้องการแจ้งเพิ่ม)
 
             // var updatedBy = User.Identity?.Name;
@@ -103,10 +127,10 @@ namespace RBACapi.Controllers
             //     updatedBy = "anonymous";
             // }
             var updatedBy = UserHelper.GetCurrentUsername(User.Identity);
-            userAuthorize.UPDATED_BY = updatedBy;
-            userAuthorize.UPDATED_DATETIME = DateTime.UtcNow;
+            // userAuthorize.UPDATED_BY = updatedBy;
+            // userAuthorize.UPDATED_DATETIME = DateTime.UtcNow;
 
-            await _usersAuthorizeService.UpdateAsync(userAuthorize);
+            await _usersAuthorizeService.UpdateAsync(authCode, request, updatedBy);
             return NoContent();
         }
 
