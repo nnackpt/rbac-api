@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+// using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RBACapi.Models;
 using RBACapi.Models.Dtos;
@@ -35,9 +35,21 @@ namespace RBACapi.Controllers
             return Ok(userAuthorizations);
         }
 
+        // GET: api/CmUserAuthorize/user/{userId}/facilities
+        [HttpGet("user/{userId}/facilities")]
+        public async Task<ActionResult<IEnumerable<FacilitySelectionDto>>> GetUserFacilitiesByUserId(string userId)
+        {
+            var facilities = await _usersAuthorizeService.GetUserFacilitiesByUserIdAsync(userId);
+            if (facilities == null || !facilities.Any())
+            {
+                return NotFound();
+            }
+            return Ok(facilities);
+        }
+
         // GET: api/UserAuthorize/{authCode}
         [HttpGet("{authCode}")]
-        public async Task<ActionResult<CM_USERS_AUTHORIZE>> GetUserAuthorizeById(string authCode)
+        public async Task<ActionResult<IEnumerable<CM_USERS_AUTHORIZE>>> GetUserAuthorizeById(string authCode)
         {
             var userAuthorize = await _usersAuthorizeService.GetByIdAsync(authCode);
 
@@ -100,35 +112,13 @@ namespace RBACapi.Controllers
         [HttpPut("{authCode}")]
         public async Task<IActionResult> UpdateUserAuthorize(string authCode, UsersAuthorizeUpdateRequestDto request)
         {
-            var existingUserAuthorize = await _usersAuthorizeService.GetByAuthCodeForFacilitiesAsync(authCode);
-            if (!existingUserAuthorize.Any())
+            var existingUserAuthorizations = await _usersAuthorizeService.GetByAuthCodeForFacilitiesAsync(authCode);
+            if (!existingUserAuthorizations.Any())
             {
                 return NotFound();
             }
 
-            // APP_CODE และ USERID แก้ไขไม่ได้
-            // userAuthorize.APP_CODE = userAuthorize.APP_CODE;
-            // userAuthorize.USERID = userAuthorize.USERID;
-            // if (!string.IsNullOrEmpty(request.ROLE_CODE))
-            //     userAuthorize.ROLE_CODE = request.ROLE_CODE;
-            // if (!string.IsNullOrEmpty(request.FNAME))
-            //     userAuthorize.FNAME = request.FNAME;
-            // if (!string.IsNullOrEmpty(request.LNAME))
-            //     userAuthorize.LNAME = request.LNAME;
-            // if (!string.IsNullOrEmpty(request.ORG))
-            //     userAuthorize.ORG = request.ORG;
-            // if (request.ACTIVE.HasValue)
-            //     userAuthorize.ACTIVE = request.ACTIVE;
-            // ไม่รองรับการแก้ไข Facilities ในการ update เดี่ยวนี้ (ถ้าต้องการแจ้งเพิ่ม)
-
-            // var updatedBy = User.Identity?.Name;
-            // if (string.IsNullOrEmpty(updatedBy))
-            // {
-            //     updatedBy = "anonymous";
-            // }
             var updatedBy = UserHelper.GetCurrentUsername(User.Identity);
-            // userAuthorize.UPDATED_BY = updatedBy;
-            // userAuthorize.UPDATED_DATETIME = DateTime.UtcNow;
 
             await _usersAuthorizeService.UpdateAsync(authCode, request, updatedBy);
             return NoContent();
