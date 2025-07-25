@@ -96,7 +96,7 @@ namespace RBACapi.Services
             return createdAuthorizations;
         }
 
-        // Update Async
+        // UpdateAsync
         public async Task UpdateAsync(string authCode, UsersAuthorizeUpdateRequestDto request, string updatedBy)
         {
             var now = DateTime.UtcNow;
@@ -113,62 +113,100 @@ namespace RBACapi.Services
 
             if (request.Facilities != null)
             {
-                var currentFacilitiesInDb = existingAuthorizationsForAuthCode.Select(ea => new FacilitySelectionDto
+                var currentFacilitiesInDb = existingAuthorizationsForAuthCode.Select(ea => new
                 {
-                    SITE_CODE = ea.SITE_CODE!,
-                    DOMAIN_CODE = ea.DOMAIN_CODE!,
-                    FACT_CODE = ea.FACT_CODE!
+                    ea.SITE_CODE,
+                    ea.DOMAIN_CODE,
+                    ea.FACT_CODE
                 }).ToList();
 
-                var requestedFacilities = request.Facilities.ToList();
+                var requestedFacilities = request.Facilities.Select(rf => new
+                {
+                    rf.SITE_CODE,
+                    rf.DOMAIN_CODE,
+                    rf.FACT_CODE
+                }).ToList();
 
-                var facilitiesToRemove = existingAuthorizationsForAuthCode
-                    .Where(ea => !requestedFacilities.Any(rf =>
-                        rf.SITE_CODE == ea.SITE_CODE &&
-                        rf.DOMAIN_CODE == ea.DOMAIN_CODE &&
-                        rf.FACT_CODE == ea.FACT_CODE))
+                var facilitiesToRemove = currentFacilitiesInDb
+                    .Where(current => !requestedFacilities.Any(requested =>
+                        requested.SITE_CODE == current.SITE_CODE &&
+                        requested.DOMAIN_CODE == current.DOMAIN_CODE &&
+                        requested.FACT_CODE == current.FACT_CODE))
                     .ToList();
 
                 var facilitiesToAdd = requestedFacilities
-                    .Where(rf => !currentFacilitiesInDb.Any(cf =>
-                        cf.SITE_CODE == rf.SITE_CODE &&
-                        cf.DOMAIN_CODE == rf.DOMAIN_CODE &&
-                        cf.FACT_CODE == rf.FACT_CODE))
+                    .Where(requested => !currentFacilitiesInDb.Any(current =>
+                        current.SITE_CODE == requested.SITE_CODE &&
+                        current.DOMAIN_CODE == requested.DOMAIN_CODE &&
+                        current.FACT_CODE == requested.FACT_CODE))
                     .ToList();
 
-                // Remove
-                foreach (var entityToRemove in facilitiesToRemove)
-                {
-                    var toDelete = new CM_USERS_AUTHORIZE
-                    {
-                        AUTH_CODE = entityToRemove.AUTH_CODE,
-                        APP_CODE = entityToRemove.APP_CODE,
-                        ROLE_CODE = entityToRemove.ROLE_CODE,
-                        USERID = entityToRemove.USERID,
-                        SITE_CODE = entityToRemove.SITE_CODE,
-                        DOMAIN_CODE = entityToRemove.DOMAIN_CODE,
-                        FACT_CODE = entityToRemove.FACT_CODE
-                    };
+                var facilitiesToUpdate = requestedFacilities
+                    .Where(requested => currentFacilitiesInDb.Any(current =>
+                        current.SITE_CODE == requested.SITE_CODE &&
+                        current.DOMAIN_CODE == requested.DOMAIN_CODE &&
+                        current.FACT_CODE == requested.FACT_CODE))
+                    .ToList();
 
-                    _context.Entry(toDelete).State = EntityState.Deleted;
+                if (facilitiesToRemove.Any())
+                {
+                    foreach (var facilityToRemove in facilitiesToRemove)
+                    {
+                        var entitiesToDelete = await _context.UsersAuthorize
+                            .Where(ua => ua.AUTH_CODE == authCode &&
+                                        ua.SITE_CODE == facilityToRemove.SITE_CODE &&
+                                        ua.DOMAIN_CODE == facilityToRemove.DOMAIN_CODE &&
+                                        ua.FACT_CODE == facilityToRemove.FACT_CODE)
+                            .ToListAsync();
+
+                        _context.UsersAuthorize.RemoveRange(entitiesToDelete);
+                    }
                 }
 
-                // Add
-                foreach (var facilityDto in facilitiesToAdd)
+                if (facilitiesToUpdate.Any())
                 {
+                    foreach (var facilityToUpdate in facilitiesToUpdate)
+                    {
+                        var entitiesToUpdate = await _context.UsersAuthorize
+                            .Where(ua => ua.AUTH_CODE == authCode &&
+                                        ua.SITE_CODE == facilityToUpdate.SITE_CODE &&
+                                        ua.DOMAIN_CODE == facilityToUpdate.DOMAIN_CODE &&
+                                        ua.FACT_CODE == facilityToUpdate.FACT_CODE)
+                            .ToListAsync();
+
+                        foreach (var entity in entitiesToUpdate)
+                        {
+                            entity.ROLE_CODE = request.ROLE_CODE ?? entity.ROLE_CODE;
+                            entity.FNAME = request.FNAME ?? entity.FNAME;
+                            entity.LNAME = request.LNAME ?? entity.LNAME;
+                            entity.ORG = request.ORG ?? entity.ORG;
+                            entity.ACTIVE = request.ACTIVE ?? entity.ACTIVE;
+                            entity.UPDATED_BY = updatedBy;
+                            entity.UPDATED_DATETIME = now;
+                        }
+                    }
+                }
+
+                foreach (var facilityToAdd in facilitiesToAdd)
+                {
+                    var originalFacility = request.Facilities.First(rf =>
+                        rf.SITE_CODE == facilityToAdd.SITE_CODE &&
+                        rf.DOMAIN_CODE == facilityToAdd.DOMAIN_CODE &&
+                        rf.FACT_CODE == facilityToAdd.FACT_CODE);
+
                     var newAuth = new CM_USERS_AUTHORIZE
                     {
                         AUTH_CODE = authCode,
                         APP_CODE = baseUserAuthorization.APP_CODE,
                         ROLE_CODE = request.ROLE_CODE ?? baseUserAuthorization.ROLE_CODE,
                         USERID = baseUserAuthorization.USERID,
-                        SITE_CODE = facilityDto.SITE_CODE,
-                        DOMAIN_CODE = facilityDto.DOMAIN_CODE,
-                        FACT_CODE = facilityDto.FACT_CODE,
+                        SITE_CODE = originalFacility.SITE_CODE,
+                        DOMAIN_CODE = originalFacility.DOMAIN_CODE,
+                        FACT_CODE = originalFacility.FACT_CODE,
                         FNAME = request.FNAME ?? baseUserAuthorization.FNAME,
                         LNAME = request.LNAME ?? baseUserAuthorization.LNAME,
                         ORG = request.ORG ?? baseUserAuthorization.ORG,
-                        ACTIVE = request.ACTIVE ?? baseUserAuthorization.ACTIVE,
+                        ACTIVE = request.ACTIVE ?? baseUserAuthorization.ACTIVE ?? true,
                         CREATED_BY = baseUserAuthorization.CREATED_BY,
                         CREATED_DATETIME = baseUserAuthorization.CREATED_DATETIME,
                         UPDATED_BY = updatedBy,
@@ -222,6 +260,21 @@ namespace RBACapi.Services
         {
             var facilities = await _context.UsersAuthorize
                 .Where(u => u.USERID == userId)
+                .Select(u => new FacilitySelectionDto
+                {
+                    SITE_CODE = u.SITE_CODE!,
+                    DOMAIN_CODE = u.DOMAIN_CODE!,
+                    FACT_CODE = u.FACT_CODE!
+                })
+                .Distinct()
+                .ToListAsync();
+
+            return facilities;
+        }
+
+        public async Task<IEnumerable<FacilitySelectionDto>> GetAllAvailableFacilitiesAsync()
+        {
+            var facilities = await _context.UsersAuthorize
                 .Select(u => new FacilitySelectionDto
                 {
                     SITE_CODE = u.SITE_CODE!,

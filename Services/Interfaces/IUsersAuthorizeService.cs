@@ -12,6 +12,7 @@ namespace RBACapi.Services.Interfaces
 
         Task<IEnumerable<FacilitySelectionDto>> GetUserFacilitiesByAuthCodeAsync(string authCode);
         Task<IEnumerable<FacilitySelectionDto>> GetUserFacilitiesByUserIdAsync(string userId);
+        Task<IEnumerable<FacilitySelectionDto>> GetAllAvailableFacilitiesAsync();
         Task<IEnumerable<CM_USERS_AUTHORIZE>> CreateAsync(UsersAuthorizeCreateRequestDto request, string createdBy);
         Task UpdateAsync(string authCode, UsersAuthorizeUpdateRequestDto request, string updatedBy);
         Task DeleteAsync(string authCode);

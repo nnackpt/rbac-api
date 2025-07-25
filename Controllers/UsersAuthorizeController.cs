@@ -72,6 +72,14 @@ namespace RBACapi.Controllers
             return Ok(facilities);
         }
 
+        // GET: api/CmUserAuthorize/facilities/all
+        [HttpGet("facilities/all")]
+        public async Task<ActionResult<IEnumerable<FacilitySelectionDto>>> GetAllAvailableFacilities()
+        {
+            var facilities = await _usersAuthorizeService.GetAllAvailableFacilitiesAsync();
+            return Ok(facilities);
+        }
+
         // POST: api/UserAuthorize
         [HttpPost]
         // [Authorize]
