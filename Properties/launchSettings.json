@@ -16,7 +16,7 @@
       "launchUrl": "swagger",
       "windowsAuthentication": true,
       "anonymousAuthentication": false,
-      "applicationUrl": "http://localhost:5070;http://10.83.51.52:5070;http://0.0.0.0:5070",
+      "applicationUrl": "http://localhost:5070;http://192.168.152.16:5070;http://0.0.0.0:5070",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -27,7 +27,7 @@
       "launchUrl": "swagger",
       "windowsAuthentication": true,
       "anonymousAuthentication": false,
-      "applicationUrl": "https://localhost:7070;https://10.83.51.52:7070;https://0.0.0.0:7070",
+      "applicationUrl": "https://localhost:7070;https://192.168.152.16:7070;https://0.0.0.0:7070",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

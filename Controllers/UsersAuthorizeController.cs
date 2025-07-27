@@ -61,7 +61,7 @@ namespace RBACapi.Controllers
         }
 
         // GET: api/CmUserAuthorize/{authCode}/facilities
-        [HttpGet("{authCode}/facilities")] 
+        [HttpGet("{authCode}/facilities")]
         public async Task<ActionResult<IEnumerable<FacilitySelectionDto>>> GetUserFacilities(string authCode)
         {
             var facilities = await _usersAuthorizeService.GetUserFacilitiesByAuthCodeAsync(authCode);
@@ -102,7 +102,8 @@ namespace RBACapi.Controllers
 
             var createdAuthorizations = await _usersAuthorizeService.CreateAsync(request, createdBy);
 
-            var responseDtos = createdAuthorizations.Select(a => new UsersAuthorizeCreateResponseDto {
+            var responseDtos = createdAuthorizations.Select(a => new UsersAuthorizeCreateResponseDto
+            {
                 AUTH_CODE = a.AUTH_CODE,
                 APP_CODE = a.APP_CODE,
                 ROLE_CODE = a.ROLE_CODE,
@@ -143,6 +144,33 @@ namespace RBACapi.Controllers
             }
             await _usersAuthorizeService.DeleteAsync(authCode);
             return NoContent();
+        }
+
+        // DELETE: api/CmUserAuthorize/Delete/{userId}/{appCode}/{roleCode}
+        [HttpDelete("DeleteByUserIdAppCodeRoleCode/{userId}/{appCode}/{roleCode}")]
+        public async Task<IActionResult> DeleteByUserIdAppCodeRoleCode(string userId, string appCode, string roleCode)
+        {
+            try
+            {
+                await _usersAuthorizeService.DeleteByUserIdAppCodeRoleCodeAsync(userId, appCode, roleCode);
+                return Ok(new { message = "User deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // GET: api/CmUserAuthorize/user/{userId}/facilities/{appCode}/{roleCode}
+        [HttpGet("user/{userId}/facilities/{appCode}/{roleCode}")]
+        public async Task<ActionResult<IEnumerable<FacilitySelectionDto>>> GetUserFacilitiesByUserIdAppCodeRoleCode(string userId, string appCode, string roleCode)
+        {
+            var facilities = await _usersAuthorizeService.GetUserFacilitiesByUserIdAppCodeRoleCodeAsync(userId, appCode, roleCode);
+            if (facilities == null || !facilities.Any())
+            {
+                return Ok(new List<FacilitySelectionDto>());
+            }
+            return Ok(facilities);
         }
     }
 }

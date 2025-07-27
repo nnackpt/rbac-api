@@ -1,6 +1,7 @@
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using RBACapi.Data;
 using RBACapi.Services;
 using RBACapi.Services.Interfaces;
@@ -28,6 +29,12 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING")));
+
+builder.Services.AddScoped<IDbContextFactory<ApplicationDbContext>>(provider =>
+{
+    var options = provider.GetRequiredService<DbContextOptions<ApplicationDbContext>>();
+    return new PooledDbContextFactory<ApplicationDbContext>(options);
+});
 
 builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
 builder.Services.AddScoped<IAppFunctionsService, AppFunctionsService>();
