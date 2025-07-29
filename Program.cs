@@ -18,7 +18,8 @@ builder.Services.AddCors(options =>
             "http://localhost:3000", 
             "http://10.83.51.52:3000",
             "https://localhost:3000", 
-            "https://10.83.51.52:3000"
+            "https://10.83.51.52:3000",
+            "http://10.83.49.10:3000"
         )
         .AllowCredentials()
         .AllowAnyHeader()
@@ -70,6 +71,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// #region start ปรับเพิ่มการเรียกใช้ react
+app.UseStaticFiles();
+app.UseRouting();
+app.MapFallbackToFile("index.html");
+// #endregion
 
 app.UseCors("AllowFrontend");
 
