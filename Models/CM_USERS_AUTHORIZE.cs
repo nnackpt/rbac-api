@@ -18,5 +18,8 @@ namespace RBACapi.Models
         public DateTimeOffset? CREATED_DATETIME { get; set; }
         public string? UPDATED_BY { get; set; }
         public DateTimeOffset? UPDATED_DATETIME { get; set; }
+
+        public CM_APPLICATIONS? Application { get; set; }
+        public CM_APPS_ROLES? Role { get; set; }
     }
 }

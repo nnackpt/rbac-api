@@ -15,12 +15,12 @@ namespace RBACapi.Data.EntityConfigurations
             builder.Property(e => e.AUTH_CODE)
                 .IsRequired();
 
-            builder.HasOne<CM_APPS_ROLES>()
+            builder.HasOne(e => e.Role)
                 .WithMany()
                 .HasForeignKey(e => e.ROLE_CODE)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne<CM_APPLICATIONS>()
+            builder.HasOne(e => e.Application)
                 .WithMany()
                 .HasForeignKey(e => e.APP_CODE)
                 .OnDelete(DeleteBehavior.Restrict);
