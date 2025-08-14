@@ -12,27 +12,27 @@ ExcelPackage.License.SetNonCommercialOrganization("<My Noncommercial organizatio
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowFrontend", policy =>
-//     {
-//         policy.WithOrigins(allowedOrigins!)
-//         .AllowCredentials()
-//         .AllowAnyHeader()
-//         .AllowAnyMethod();
-//     });
-// });
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://10.83.49.10:3000")
+        policy.WithOrigins(allowedOrigins!)
         .AllowCredentials()
         .AllowAnyHeader()
         .AllowAnyMethod();
     });
 });
+
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowFrontend", policy =>
+//     {
+//         policy.WithOrigins("http://10.83.49.188:3000")
+//         .AllowCredentials()
+//         .AllowAnyHeader()
+//         .AllowAnyMethod();
+//     });
+// });
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -82,9 +82,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // #region start ปรับเพิ่มการเรียกใช้ react
-// app.UseStaticFiles();
-// app.UseRouting();
-// app.MapFallbackToFile("index.html");
+app.UseStaticFiles();
+app.UseRouting();
+app.MapFallbackToFile("index.html");
 // #endregion
 
 app.UseCors("AllowFrontend");

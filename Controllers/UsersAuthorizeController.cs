@@ -172,5 +172,34 @@ namespace RBACapi.Controllers
             }
             return Ok(facilities);
         }
+
+        // GET: api/CmUserAuthorize/userids/autocomplete?searchTerm=abc&limit=10
+        [HttpGet("userids/autocomplete")]
+        public async Task<ActionResult<IEnumerable<string>>> GetUserIdsForAutocomplete(
+            [FromQuery] string searchTerm = "",
+            [FromQuery] int limit = 10)
+        {
+            var userIds = await _usersAuthorizeService.GetDistinctUserIdsAsync(searchTerm, limit);
+            return Ok(userIds);
+        }
+
+        // GET: api/CmUserAuthorize/user/{userId}/profile
+        [HttpGet("user/{userId}/profile")]
+        public async Task<ActionResult<UserProfileDto>> GetUserProfileByUserId(string userId)
+        {
+            var profile = await _usersAuthorizeService.GetUserProfileByUserIdAsync(userId);
+            if (profile == null) return NotFound();
+            return Ok(profile);
+        }
+
+        // GET: api/CmUserAuthorize/profile?userid=abc
+        [HttpGet("profile")]
+        public async Task<ActionResult<UserProfileDto>> GetUserProfile([FromQuery] string userid)
+        {
+            if (string.IsNullOrWhiteSpace(userid)) return BadRequest("userid is required.");
+            var profile = await _usersAuthorizeService.GetUserProfileByUserIdAsync(userid);
+            if (profile == null) return NotFound();
+            return Ok(profile);
+        } 
     }
 }

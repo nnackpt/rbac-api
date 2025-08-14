@@ -112,8 +112,8 @@ namespace RBACapi.Services
 
             var allExistingFacilitiesForUserAppRole = await _context.UsersAuthorize
                 .AsNoTracking()
-                .Where(ua => ua.USERID == baseUserAuthorization.USERID && 
-                            ua.APP_CODE == baseUserAuthorization.APP_CODE && 
+                .Where(ua => ua.USERID == baseUserAuthorization.USERID &&
+                            ua.APP_CODE == baseUserAuthorization.APP_CODE &&
                             ua.ROLE_CODE == baseUserAuthorization.ROLE_CODE)
                 .ToListAsync();
 
@@ -373,6 +373,54 @@ namespace RBACapi.Services
                 .ToListAsync();
 
             return facilities;
+        }
+
+        public async Task<IEnumerable<string>> GetDistinctUserIdsAsync(string searchTerm = "", int limit = 10)
+        {
+            var query = _context.UsersAuthorize.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(u => u.USERID!.Contains(searchTerm));
+            }
+
+            return await query
+                .Select(u => u.USERID!)
+                .Distinct()
+                .Take(limit)
+                .ToListAsync();
+        }
+
+        public async Task<UserProfileDto?> GetUserProfileByUserIdAsync(string userId)
+        {
+            var q = _context.UsersAuthorize
+                .AsNoTracking()
+                .Where(u => u.USERID == userId);
+
+            var latest = await q
+                .OrderByDescending(u => u.UPDATED_DATETIME ?? u.CREATED_DATETIME)
+                .Select(u => new UserProfileDto
+                {
+                    USERID = u.USERID,
+                    FNAME = u.FNAME,
+                    LNAME = u.LNAME,
+                    ORG = u.ORG
+                })
+                .FirstOrDefaultAsync();
+
+            if (latest == null) return null;
+
+            if (string.IsNullOrWhiteSpace(latest.FNAME) ||
+                string.IsNullOrWhiteSpace(latest.LNAME) ||
+                string.IsNullOrWhiteSpace(latest.ORG))
+            {
+                var any = await q.Select(u => new { u.FNAME, u.LNAME, u.ORG }).ToListAsync();
+                latest.FNAME ??= any.Select(a => a.FNAME).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
+                latest.LNAME ??= any.Select(a => a.LNAME).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
+                latest.ORG   ??= any.Select(a => a.ORG).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
+            }
+
+            return latest;
         }
     }
 }

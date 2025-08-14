@@ -27,21 +27,66 @@ namespace RBACapi.Controllers
         {
             try
             {
-                _logger.LogInformation($"Generating user review form for Application: {applicationName}, Role: {roleName}");
+                _logger.LogInformation($"Generating user review form for Application: {applicationName ?? "ALL"}, Role: {roleName ?? "ALL"}");
+
+                // Clean up parameters
+                applicationName = string.IsNullOrWhiteSpace(applicationName) ? null : applicationName.Trim();
+                roleName = string.IsNullOrWhiteSpace(roleName) ? null : roleName.Trim();
 
                 var excelBytes = await _userReviewFormService.GenerateUserReviewFormAsync(applicationName, roleName);
 
-                var fileName = $"Application_User_Review_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                if (excelBytes == null || excelBytes.Length == 0)
+                {
+                    _logger.LogWarning("Generated Excel file is empty");
+                    return BadRequest(new { message = "Generated file is empty" });
+                }
+
+                // Generate dynamic filename based on parameters
+                var fileNameParts = new List<string> { "Application_User_Review" };
+                if (!string.IsNullOrEmpty(applicationName))
+                {
+                    fileNameParts.Add(applicationName.Replace(" ", "_"));
+                }
+                if (!string.IsNullOrEmpty(roleName))
+                {
+                    fileNameParts.Add(roleName.Replace(" ", "_"));
+                }
+                fileNameParts.Add(DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+
+                var fileName = string.Join("_", fileNameParts) + ".xlsx";
                 var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-                _logger.LogInformation($"Generated user review form with {excelBytes.Length} bytes");
+                _logger.LogInformation($"Generated user review form '{fileName}' with {excelBytes.Length} bytes");
+
+                // Add proper headers for file download
+                Response.Headers.Add("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+                Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
+                Response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+                Response.Headers.Add("Pragma", "no-cache");
+                Response.Headers.Add("Expires", "0");
 
                 return File(excelBytes, contentType, fileName);
+            }
+            catch (ArgumentException argEx)
+            {
+                _logger.LogWarning(argEx, "Invalid parameters provided");
+                return BadRequest(new { message = "Invalid parameters provided", error = argEx.Message });
+            }
+            catch (InvalidOperationException opEx)
+            {
+                _logger.LogWarning(opEx, "No data found for the specified criteria");
+                return NotFound(new { message = "No data found for the specified criteria", error = opEx.Message });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while generating user review form");
-                return StatusCode(500, new { message = "An error occurred while generating user review form", error = ex.Message });
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while generating user review form",
+                    error = ex.Message,
+                    details = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                });
             }
         }
 
